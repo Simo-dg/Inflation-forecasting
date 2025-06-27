@@ -1,54 +1,105 @@
 import pandas as pd
-from sklearn.linear_model import LinearRegression, LassoCV
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 from sklearn.feature_selection import RFE
 from sklearn.metrics import mean_squared_error
-import matplotlib.pyplot as plt
-import numpy as np
+from src.utils import train_test_split_time_series
 
-def run_ols(df, target_col):
-    X = df.drop(columns=[target_col]).dropna()
-    y = df[target_col].dropna()
-    X, y = X.align(y, join='inner', axis=0)
+def run_ols(df, target_col, train_start, train_end, test_start, test_end):
+    # Split data
+    X_train, y_train, X_test, y_test = train_test_split_time_series(
+        df, train_start, train_end, test_start, test_end, target_col
+    )
 
-    model = LinearRegression()
-    model.fit(X, y)
-    y_pred = model.predict(X)
+    # Align train X,y
+    X_train, y_train = X_train.dropna(), y_train.dropna()
+    X_train, y_train = X_train.align(y_train, join='inner', axis=0)
 
-    rmse = np.sqrt(mean_squared_error(y, y_pred))
+    # We'll do rolling 1-step ahead forecasts on test
+    history_X = X_train.copy()
+    history_y = y_train.copy()
+    forecasts = []
 
-    # Plot
-    plt.figure(figsize=(10,4))
-    plt.plot(y.index.to_numpy(), y.to_numpy(), label='True')
-    plt.plot(y.index.to_numpy(), y_pred, label='OLS Prediction', linestyle='--')
-    plt.title('OLS Forecast (in-sample)')
+    for i in range(len(X_test)):
+        # Fit model on current history
+        model = LinearRegression()
+        model.fit(history_X, history_y)
+
+        # Predict 1-step ahead (next test sample)
+        x_next = X_test.iloc[i:i+1]
+        fcast = model.predict(x_next)[0]
+        forecasts.append(fcast)
+
+        # Add observed test data to history for next iteration
+        history_X = pd.concat([history_X, x_next])
+        history_y = pd.concat([history_y, y_test.iloc[i:i+1]])
+
+    forecasts = np.array(forecasts)
+
+    # Compute RMSE on test set
+    rmse = np.sqrt(mean_squared_error(y_test.values, forecasts))
+
+    # Plot test period only with your preferred style
+    plt.figure(figsize=(12, 6))
+    plt.plot(y_test.index.to_numpy(), y_test.values, label="Observed (Test)", color="blue", linewidth=2)
+    plt.plot(y_test.index.to_numpy(), forecasts, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
+    plt.title(f"OLS One-step Ahead Forecast (RMSE={rmse:.4f})")
+    plt.xlabel("Date")
+    plt.ylabel(target_col)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/ols_forecast.png")
+    plt.savefig("results/ols_one_step_forecast_test_only.png")
+    plt.close()
 
     return model, rmse
 
-def run_ols_feature_selection(df, target_col, n_features=5):
-    X = df.drop(columns=[target_col]).dropna()
-    y = df[target_col].dropna()
-    X, y = X.align(y, join='inner', axis=0)
 
-    model = LinearRegression()
-    selector = RFE(model, n_features_to_select=n_features)
-    selector.fit(X, y)
-    selected_features = X.columns[selector.support_]
+def run_ols_feature_selection(df, target_col, train_start, train_end, test_start, test_end, n_features=5):
+    # Split data
+    X_train, y_train, X_test, y_test = train_test_split_time_series(
+        df, train_start, train_end, test_start, test_end, target_col
+    )
 
-    model.fit(X[selected_features], y)
-    y_pred = model.predict(X[selected_features])
+    X_train, y_train = X_train.dropna(), y_train.dropna()
+    X_train, y_train = X_train.align(y_train, join='inner', axis=0)
 
-    rmse = np.sqrt(mean_squared_error(y, y_pred))
+    history_X = X_train.copy()
+    history_y = y_train.copy()
+    forecasts = []
+    selected_features = None
 
-    # Plot
-    plt.figure(figsize=(10,4))
-    plt.plot(y.index.to_numpy(), y.to_numpy(), label='True')
-    plt.plot(y.index.to_numpy(), y_pred, label='OLS + RFE Prediction', linestyle='--')
-    plt.title('OLS with Feature Selection')
+    for i in range(len(X_test)):
+        # Fit RFE selector + model on current history
+        base_model = LinearRegression()
+        selector = RFE(base_model, n_features_to_select=n_features)
+        selector.fit(history_X, history_y)
+        selected_features = history_X.columns[selector.support_]
+
+        model = LinearRegression()
+        model.fit(history_X[selected_features], history_y)
+
+        x_next = X_test.iloc[i:i+1][selected_features]
+        fcast = model.predict(x_next)[0]
+        forecasts.append(fcast)
+
+        # Update history with observed test data
+        history_X = pd.concat([history_X, X_test.iloc[i:i+1]])
+        history_y = pd.concat([history_y, y_test.iloc[i:i+1]])
+
+    forecasts = np.array(forecasts)
+    rmse = np.sqrt(mean_squared_error(y_test.values, forecasts))
+
+    # Plot test period only
+    plt.figure(figsize=(12, 6))
+    plt.plot(y_test.index.to_numpy(), y_test.values, label="Observed (Test)", color="blue", linewidth=2)
+    plt.plot(y_test.index.to_numpy(), forecasts, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
+    plt.title(f"OLS + RFE One-step Ahead Forecast (RMSE={rmse:.4f})")
+    plt.xlabel("Date")
+    plt.ylabel(target_col)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/ols_rfe_forecast.png")
+    plt.savefig("results/ols_rfe_one_step_forecast_test_only.png")
+    plt.close()
 
     return model, selected_features, rmse

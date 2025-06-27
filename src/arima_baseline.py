@@ -4,24 +4,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 import pandas as pd
+from src.utils import train_test_split_time_series
 
-def run_arima(df, target_col, min_train_size=150, max_p=3, max_d=2, max_q=3):
+def run_arima(df, target_col, train_start, train_end, test_start, test_end, max_p=3, max_d=2, max_q=3):
     warnings.filterwarnings("ignore")
 
-    y = df[target_col].dropna()
+    # Use utility function to split train/test by datetime index
+    _, y_train, _, y_test = train_test_split_time_series(
+        df, train_start, train_end, test_start, test_end, target_col
+    )
 
-    # 1. Find best ARIMA order on initial training set only
-    train_init = y.iloc[:min_train_size]
+    train = y_train.dropna()
+    test = y_test.dropna()
+
+    # 1. Find best ARIMA order on the training set only
     best_aic = np.inf
     best_order = None
-    
     for p in range(max_p + 1):
         for d in range(max_d + 1):
             for q in range(max_q + 1):
                 if p == 0 and d == 0 and q == 0:
                     continue
                 try:
-                    model = ARIMA(train_init, order=(p, d, q))
+                    model = ARIMA(train, order=(p, d, q))
                     model_fit = model.fit()
                     if model_fit.aic < best_aic:
                         best_aic = model_fit.aic
@@ -30,44 +35,58 @@ def run_arima(df, target_col, min_train_size=150, max_p=3, max_d=2, max_q=3):
                     continue
 
     if best_order is None:
-        raise ValueError("No suitable ARIMA model found on initial training data")
+        raise ValueError("No suitable ARIMA model found on training data")
 
     print(f"Selected ARIMA order: {best_order} with AIC: {best_aic:.2f}")
 
+    # 2. Rolling one-step ahead forecast on test set
+    history = train.copy()
     forecasts = []
-    actuals = []
-    forecast_index = []
+    forecast_lower = []
+    forecast_upper = []
 
-    # 2. Rolling forecast with fixed best_order
-    for i in range(min_train_size, len(y)):
-        train = y.iloc[:i]
+    for t in range(len(test)):
         try:
-            model = ARIMA(train, order=best_order)
+            model = ARIMA(history, order=best_order)
             model_fit = model.fit()
-            fcast = model_fit.forecast(steps=1)
-            forecasts.append(fcast.iloc[0])
+            # Get forecast mean and confidence interval (90%)
+            fcast_result = model_fit.get_forecast(steps=1)
+            mean_forecast = fcast_result.predicted_mean.iloc[0]
+            conf_int = fcast_result.conf_int(alpha=0.1).iloc[0]  # lower, upper
+            
+            forecasts.append(mean_forecast)
+            forecast_lower.append(conf_int[0])
+            forecast_upper.append(conf_int[1])
         except Exception:
             forecasts.append(np.nan)
+            forecast_lower.append(np.nan)
+            forecast_upper.append(np.nan)
 
-        actuals.append(y.iloc[i])
-        forecast_index.append(y.index[i])
+        # Append actual observed value to history for next step forecast
+        # Use pd.concat instead of deprecated .append()
+        history = pd.concat([history, test.iloc[t:t+1]])
 
-    # 3. Create series for forecasts and actuals
-    forecast_series = pd.Series(forecasts, index=forecast_index)
-    actual_series = pd.Series(actuals, index=forecast_index)
+    forecasts = np.array(forecasts)
+    forecast_lower = np.array(forecast_lower)
+    forecast_upper = np.array(forecast_upper)
 
-    # 4. Calculate RMSE on non-NaN forecasts
-    valid_idx = forecast_series.notna()
-    rmse = np.sqrt(mean_squared_error(actual_series[valid_idx], forecast_series[valid_idx]))
+    # 3. Calculate RMSE on valid forecasts only
+    valid_idx = ~np.isnan(forecasts)
+    rmse = np.sqrt(mean_squared_error(test.values[valid_idx], forecasts[valid_idx]))
 
-    # 5. Plot actual vs forecast
-    plt.figure(figsize=(12,5))
-    plt.plot(y, label='Actual')
-    plt.plot(forecast_series, label=f'One-step ARIMA forecast (order={best_order})', linestyle='--')
-    plt.title('Rolling One-Step-Ahead ARIMA Forecast')
+    # 4. Plot test period only with styled plot
+    plt.figure(figsize=(12, 6))
+    plt.plot(test.index.to_numpy(), test.values, label="Observed (Test)", color="blue", linewidth=2)
+    plt.plot(test.index.to_numpy(), forecasts, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
+    plt.fill_between(test.index.to_numpy(), forecast_lower, forecast_upper, color="red", alpha=0.3, label="90% CI")
+    plt.title(f"ARIMA One-step Ahead Forecast (RMSE={rmse:.4f})")
+    plt.xlabel("Date")
+    plt.ylabel(target_col)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/arima_rolling_forecast.png")
+    plt.savefig("results/arima_one_step_forecast_test_only.png")
     plt.close()
 
+    # 5. Return forecast series with index aligned to test, RMSE and best order
+    forecast_series = pd.Series(forecasts, index=test.index)
     return forecast_series, rmse, best_order

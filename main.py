@@ -55,22 +55,53 @@ for model_name, model_desc in main_pbar:
         start_time = time.time()
         
         if model_name == "ARIMA":
-            _, rmse, best_order = run_arima(df, target_col)
-            
+            forecast, rmse, best_order = run_arima(
+                df, target_col,
+                train_start="2001-12-31",
+                train_end="2019-12-31",
+                test_start="2020-01-01",
+                test_end="2023-12-31"
+            )
+
         elif model_name == "OLS":
-            _, rmse = run_ols(df, target_col)
-            
+            model, rmse = run_ols(
+                df, target_col,
+                train_start="2001-12-31",
+                train_end="2019-12-31",
+                test_start="2020-01-01",
+                test_end="2023-12-31"
+            )
+
         elif model_name == "OLS + RFE":
-            _, _, rmse = run_ols_feature_selection(df, target_col)
+            model, selected_features, rmse = run_ols_feature_selection(
+                df, target_col,
+                train_start="2001-12-31",
+                train_end="2019-12-31",
+                test_start="2020-01-01",
+                test_end="2023-12-31",
+                n_features=5 
+            )
             
         elif model_name == "Random Forest":
-            _, rmse = run_rf(df, target_col)
+            _, rmse = run_rf(df, target_col,
+                train_start="2001-12-31",
+                train_end="2019-12-31",
+                test_start="2020-01-01",
+                test_end="2023-12-31")
             
         elif model_name == "XGBoost":
-            _, rmse = run_xgboost(df, target_col)
+            _, rmse = run_xgboost(df, target_col,
+                train_start="2001-12-31",
+                train_end="2019-12-31",
+                test_start="2020-01-01",
+                test_end="2023-12-31")
             
         elif model_name == "MLP":
-            _, rmse = run_mlp(df, target_col)
+            _, rmse = run_mlp(df, target_col,
+                train_start="2001-12-31",
+                train_end="2019-12-31",
+                test_start="2020-01-01",
+                test_end="2023-12-31")
             
         elif model_name == "Bayesian DLM (MCMC)":
             _, rmse = run_dlm_pymc(
