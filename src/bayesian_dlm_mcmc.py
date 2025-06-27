@@ -97,12 +97,12 @@ def run_dlm_pymc(df, target_col, train_start, train_end, test_start, test_end, n
     plt.plot(y_test.index.to_numpy(), y_test.values, label="Observed (Test)", color="blue", linewidth=2)
     plt.plot(y_test.index.to_numpy(), forecast_means, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
     plt.fill_between(y_test.index.to_numpy(), forecast_lower, forecast_upper, color="red", alpha=0.3, label="90% CI")
-    plt.title(f"DLM (PyMC) One-step Ahead Forecast (RMSE={rmse_test:.4f})")
+    plt.title(f"DLM MCMC (RMSE={rmse_test:.4f})")
     plt.xlabel("Date")
     plt.ylabel(target_col)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/pymc_dlm_one_step_forecast_test_only.png")
+    plt.savefig("results/MCMC_forecast.png")
     plt.close()
 
     return trace, rmse_test

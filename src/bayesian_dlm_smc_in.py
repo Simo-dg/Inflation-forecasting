@@ -169,7 +169,7 @@ def run_dlm_numpyro_in(df, target_col, num_particles=5000, lag=5):
     plt.plot(time_index, y, label="Observed", color="blue", linewidth=2)
     plt.plot(time_index, beta_mean, label="SMC Estimate", linestyle="--", color="red", linewidth=2)
     plt.fill_between(time_index, beta_lower, beta_upper, alpha=0.3, color="red", label="90% CI")
-    plt.title(f"Dynamic Linear Model - Sequential Monte Carlo\n{target_col}")
+    plt.title(f"DLM - SMC\n{target_col}")
     plt.xlabel("Time")
     plt.ylabel("Value")
     plt.legend()
@@ -187,7 +187,7 @@ def run_dlm_numpyro_in(df, target_col, num_particles=5000, lag=5):
     plt.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig("results/numpyro_dlm_forecast.png", dpi=300, bbox_inches='tight')
+    plt.savefig("results/DLM_SMC_in.png", dpi=300, bbox_inches='tight')
     plt.close()
 
     # RMSE

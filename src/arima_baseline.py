@@ -79,12 +79,12 @@ def run_arima(df, target_col, train_start, train_end, test_start, test_end, max_
     plt.plot(test.index.to_numpy(), test.values, label="Observed (Test)", color="blue", linewidth=2)
     plt.plot(test.index.to_numpy(), forecasts, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
     plt.fill_between(test.index.to_numpy(), forecast_lower, forecast_upper, color="red", alpha=0.3, label="90% CI")
-    plt.title(f"ARIMA One-step Ahead Forecast (RMSE={rmse:.4f})")
+    plt.title(f"ARIMA (RMSE={rmse:.4f})")
     plt.xlabel("Date")
     plt.ylabel(target_col)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/arima_one_step_forecast_test_only.png")
+    plt.savefig("results/arima_forecast.png")
     plt.close()
 
     # 5. Return forecast series with index aligned to test, RMSE and best order

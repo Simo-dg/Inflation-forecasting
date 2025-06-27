@@ -44,12 +44,12 @@ def run_ols(df, target_col, train_start, train_end, test_start, test_end):
     plt.figure(figsize=(12, 6))
     plt.plot(y_test.index.to_numpy(), y_test.values, label="Observed (Test)", color="blue", linewidth=2)
     plt.plot(y_test.index.to_numpy(), forecasts, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
-    plt.title(f"OLS One-step Ahead Forecast (RMSE={rmse:.4f})")
+    plt.title(f"OLS (RMSE={rmse:.4f})")
     plt.xlabel("Date")
     plt.ylabel(target_col)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/ols_one_step_forecast_test_only.png")
+    plt.savefig("results/ols.png")
     plt.close()
 
     return model, rmse
@@ -94,12 +94,12 @@ def run_ols_feature_selection(df, target_col, train_start, train_end, test_start
     plt.figure(figsize=(12, 6))
     plt.plot(y_test.index.to_numpy(), y_test.values, label="Observed (Test)", color="blue", linewidth=2)
     plt.plot(y_test.index.to_numpy(), forecasts, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
-    plt.title(f"OLS + RFE One-step Ahead Forecast (RMSE={rmse:.4f})")
+    plt.title(f"OLS with Feature Selection (RMSE={rmse:.4f})")
     plt.xlabel("Date")
     plt.ylabel(target_col)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/ols_rfe_one_step_forecast_test_only.png")
+    plt.savefig("results/ols_rfe.png")
     plt.close()
 
     return model, selected_features, rmse

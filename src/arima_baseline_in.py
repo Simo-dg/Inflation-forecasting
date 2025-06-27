@@ -64,10 +64,10 @@ def run_arima_in(df, target_col, min_train_size=150, max_p=3, max_d=2, max_q=3):
     plt.figure(figsize=(12,5))
     plt.plot(y, label='Actual')
     plt.plot(forecast_series, label=f'One-step ARIMA forecast (order={best_order})', linestyle='--')
-    plt.title('Rolling One-Step-Ahead ARIMA Forecast')
+    plt.title('ARIMA')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/arima_rolling_forecast.png")
+    plt.savefig("results/arima_forecast_in.png")
     plt.close()
 
     return forecast_series, rmse, best_order

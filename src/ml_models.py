@@ -42,12 +42,12 @@ def run_rf(df, target_col, train_start, train_end, test_start, test_end):
     plt.figure(figsize=(12, 6))
     plt.plot(y_test.index.to_numpy(), y_test.values, label="Observed (Test)", color="blue", linewidth=2)
     plt.plot(y_test.index.to_numpy(), forecasts, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
-    plt.title(f"Random Forest One-step Ahead Forecast (RMSE={rmse:.4f})")
+    plt.title(f"Random Forest (RMSE={rmse:.4f})")
     plt.xlabel("Date")
     plt.ylabel(target_col)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/rf_one_step_forecast_test_only.png")
+    plt.savefig("results/rf_forecast.png")
     plt.close()
 
     return forecasts, rmse
@@ -81,12 +81,12 @@ def run_xgboost(df, target_col, train_start, train_end, test_start, test_end):
     plt.figure(figsize=(12, 6))
     plt.plot(y_test.index.to_numpy(), y_test.values, label="Observed (Test)", color="blue", linewidth=2)
     plt.plot(y_test.index.to_numpy(), forecasts, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
-    plt.title(f"XGBoost One-step Ahead Forecast (RMSE={rmse:.4f})")
+    plt.title(f"XGBoost (RMSE={rmse:.4f})")
     plt.xlabel("Date")
     plt.ylabel(target_col)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/xgb_one_step_forecast_test_only.png")
+    plt.savefig("results/xgb_forecast.png")
     plt.close()
 
     return forecasts, rmse
@@ -129,12 +129,12 @@ def run_mlp(df, target_col, train_start, train_end, test_start, test_end):
     plt.figure(figsize=(12, 6))
     plt.plot(y_test.index.to_numpy(), y_test.values, label="Observed (Test)", color="blue", linewidth=2)
     plt.plot(y_test.index.to_numpy(), forecasts, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
-    plt.title(f"MLP One-step Ahead Forecast (RMSE={rmse:.4f})")
+    plt.title(f"MLP (RMSE={rmse:.4f})")
     plt.xlabel("Date")
     plt.ylabel(target_col)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/mlp_one_step_forecast_test_only.png")
+    plt.savefig("results/mlp_forecast.png")
     plt.close()
 
     return forecasts, rmse

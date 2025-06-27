@@ -79,10 +79,10 @@ def run_dlm_dynamic_regression_in(df, target_col, num_warmup=1500, num_samples=5
     plt.figure(figsize=(10, 4))
     plt.plot(time_index, y_scaled, label="Observed (scaled)")
     plt.plot(time_index, mean_mu, label="DLM Prediction (scaled)", linestyle="--")
-    plt.title("Dynamic Linear Regression Forecast (NumPyro)")
+    plt.title("DLM regression")
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/dlm_dynamic_forecast_numpyro.png")
+    plt.savefig("results/dlm_regression_forecast_in.png")
     plt.close()
 
     residuals = mean_mu - y_scaled

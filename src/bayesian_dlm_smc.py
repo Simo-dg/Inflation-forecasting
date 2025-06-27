@@ -246,17 +246,16 @@ def run_dlm_numpyro(df, target_col, train_start="2000-01-01", train_end="2019-12
     filtered_level_test = jnp.array(filtered_level_test)
 
     rmse_test = float(np.sqrt(np.mean((y_test_np - forecast_mean_test) ** 2)))
-
     plt.figure(figsize=(12, 6))
     plt.plot(test_time_index.to_numpy(), y_test_np, label="Observed (Test)", color="blue", linewidth=2)
     plt.plot(test_time_index.to_numpy(), forecast_mean_test, label="1-step Ahead Forecast Mean", linestyle="--", color="red", linewidth=2)
     plt.fill_between(test_time_index.to_numpy(), forecast_lower_test, forecast_upper_test, color="red", alpha=0.3, label="90% CI")
-    plt.title(f"Dynamic Linear Model Forecast (RMSE={rmse_test:.4f})")
+    plt.title(f"DLM - SMC (RMSE={rmse_test:.4f})")
     plt.xlabel("Date")
     plt.ylabel(target_col)
     plt.legend()
-    plt.savefig("results/dlm_forecast_test_numpyro.png")
+    plt.savefig("results/DLM_SMC.png")
     plt.close()
-
+    
     return forecast_level, rmse_test
 

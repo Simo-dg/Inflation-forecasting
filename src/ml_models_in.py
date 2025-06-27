@@ -17,10 +17,10 @@ def run_rf_in(df, target_col):
     plt.figure(figsize=(10,4))
     plt.plot(y.index.to_numpy(), y.to_numpy(), label='True')
     plt.plot(y.index.to_numpy(), y_pred, label='Random Forest', linestyle='--')
-    plt.title('Random Forest Forecast')
+    plt.title('Random Forest')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/rf_forecast.png")
+    plt.savefig("results/rf_forecast_in.png")
     return model, rmse
 
 def run_xgboost_in(df, target_col):
@@ -34,10 +34,10 @@ def run_xgboost_in(df, target_col):
     plt.figure(figsize=(10,4))
     plt.plot(y.index.to_numpy(), y.to_numpy(), label='True')
     plt.plot(y.index.to_numpy(), y_pred, label='XGBoost', linestyle='--')
-    plt.title('XGBoost Forecast')
+    plt.title('XGBoost')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/xgb_forecast.png")
+    plt.savefig("results/xgb_forecast_in.png")
     return model, rmse
 
 def run_mlp_in(df, target_col):
@@ -57,9 +57,9 @@ def run_mlp_in(df, target_col):
     plt.figure(figsize=(10,4))
     plt.plot(y.index.to_numpy(), y.to_numpy(), label='True')
     plt.plot(y.index.to_numpy(), y_pred, label='MLP Forecast', linestyle='--')
-    plt.title('MLP Forecast')
+    plt.title('MLP')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/mlp_forecast.png")
+    plt.savefig("results/mlp_forecast_in.png")
 
     return model, rmse

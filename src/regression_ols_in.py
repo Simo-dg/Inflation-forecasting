@@ -20,10 +20,10 @@ def run_ols_in(df, target_col):
     plt.figure(figsize=(10,4))
     plt.plot(y.index.to_numpy(), y.to_numpy(), label='True')
     plt.plot(y.index.to_numpy(), y_pred, label='OLS Prediction', linestyle='--')
-    plt.title('OLS Forecast (in-sample)')
+    plt.title('OLS')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/ols_forecast.png")
+    plt.savefig("results/ols_forecast_in.png")
 
     return model, rmse
 
@@ -49,6 +49,6 @@ def run_ols_feature_selection_in(df, target_col, n_features=5):
     plt.title('OLS with Feature Selection')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/ols_rfe_forecast.png")
+    plt.savefig("results/ols_rfe_forecast_in.png")
 
     return model, selected_features, rmse

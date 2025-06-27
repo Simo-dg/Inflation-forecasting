@@ -37,10 +37,10 @@ def run_dlm_pymc_in(df, target_col):
     plt.figure(figsize=(10, 4))
     plt.plot(y.index.to_numpy(), y.to_numpy(), label="Observed")
     plt.plot(y.index.to_numpy(), mean_beta, label="Filtered βₜ", linestyle="--")
-    plt.title("DLM (PyMC) Forecast vs Observed")
+    plt.title("DLM MCMC")
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/pymc_dlm_forecast.png")
+    plt.savefig("results/MCMC_forecast_in.png")
     plt.close()
 
     rmse = np.sqrt(np.mean((mean_beta - y.values)**2))
