@@ -2,7 +2,7 @@ import os
 import time
 from tqdm import tqdm
 import pandas as pd
-
+import numpy as np
 from src.preprocessing import load_and_clean_data
 from src.arima_baseline import run_arima
 from src.regression_ols import run_ols, run_ols_feature_selection
@@ -10,6 +10,7 @@ from src.ml_models import run_rf, run_xgboost, run_mlp
 from src.bayesian_dlm_mcmc import run_dlm_pymc
 from src.bayesian_dlm_smc import run_dlm_numpyro
 from src.metrics import plot_model_comparison
+from src.bayesian_dlm_reg import run_dlm_dynamic_regression
 
 # 📁 Create folders if they don't exist
 os.makedirs("results", exist_ok=True)
@@ -36,7 +37,8 @@ models = [
     ("XGBoost", "🤖 Gradient Boosting"),
     ("MLP", "🤖 Neural Network"),
     ("Bayesian DLM (MCMC)", "🧠 Bayesian MCMC"),
-    ("Bayesian DLM (SMC)", "🧠 Sequential Monte Carlo")
+    ("Bayesian DLM (SMC)", "🧠 Sequential Monte Carlo"),
+    ("Bayesian DLM (DR)", "🧠 Dynamic Coefficients")
 ]
 
 # Initialize results dictionary
@@ -75,7 +77,9 @@ for model_name, model_desc in main_pbar:
             
         elif model_name == "Bayesian DLM (SMC)":
             _, rmse = run_dlm_numpyro(df, target_col)
-        
+        elif model_name == "Bayesian DLM (DR)":
+            trace, rmse = run_dlm_dynamic_regression(df, target_col)
+                    
         # Store result
         rmse_results[model_name] = rmse
         
