@@ -78,8 +78,15 @@ for model_name, model_desc in main_pbar:
         elif model_name == "Bayesian DLM (SMC)":
             _, rmse = run_dlm_numpyro(df, target_col)
         elif model_name == "Bayesian DLM (DR)":
-            trace, rmse = run_dlm_dynamic_regression(df, target_col)
-                    
+            trace, rmse = run_dlm_dynamic_regression(
+                df,
+                target_col="CPI - YoY",
+                train_start="2001-12-31",
+                train_end="2019-12-31",  
+                test_start="2020-01-01",
+                test_end="2023-12-31"
+            )
+
         # Store result
         rmse_results[model_name] = rmse
         
