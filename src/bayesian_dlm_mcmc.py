@@ -2,7 +2,21 @@ import pymc as pm
 import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from src.utils import train_test_split_time_series
+
+def weighted_percentile(values, weights, percentile):
+    """Calculate weighted percentile"""
+    sorted_indices = np.argsort(values)
+    sorted_values = values[sorted_indices]
+    sorted_weights = weights[sorted_indices]
+    
+    # Cumulative weights
+    cum_weights = np.cumsum(sorted_weights)
+    cum_weights = cum_weights / cum_weights[-1]  # Normalize to [0, 1]
+    
+    # Find the percentile
+    return np.interp(percentile / 100.0, cum_weights, sorted_values)
 
 def run_dlm_pymc(df, target_col, train_start, train_end, test_start, test_end, num_particles=1000):
     # Split data
@@ -22,7 +36,10 @@ def run_dlm_pymc(df, target_col, train_start, train_end, test_start, test_end, n
 
         trace = pm.sample(
             draws=2000, tune=1000, target_accept=0.95, random_seed=42, max_treedepth=15, cores=4, chains=4
+            #,idata_kwargs={"log_likelihood": True}
         )
+
+
 
     # Extract posterior samples for beta and sigma
     beta_samples = trace.posterior["beta"].stack(sample=("chain", "draw")).values  # shape (T_train, n_samples)
@@ -50,7 +67,7 @@ def run_dlm_pymc(df, target_col, train_start, train_end, test_start, test_end, n
     forecast_upper = []
 
     weights = np.ones(n_samples) / n_samples
-
+    np.random.seed(420)
     # One-step ahead forecasting loop over test points
     for t in range(T_test):
         # Propagate particles by one step of Gaussian RW: beta_t = beta_{t-1} + Normal(0, sigma)
@@ -68,8 +85,9 @@ def run_dlm_pymc(df, target_col, train_start, train_end, test_start, test_end, n
 
         # Weighted forecast mean and credible intervals
         mean_forecast = np.sum(propagated_particles * weights)
-        lower_forecast = np.percentile(propagated_particles, 5)
-        upper_forecast = np.percentile(propagated_particles, 95)
+        lower_forecast = weighted_percentile(propagated_particles, weights, 5)
+        upper_forecast = weighted_percentile(propagated_particles, weights, 95)
+
 
         forecast_means.append(mean_forecast)
         forecast_lower.append(lower_forecast)
@@ -105,4 +123,55 @@ def run_dlm_pymc(df, target_col, train_start, train_end, test_start, test_end, n
     plt.savefig("results/MCMC_forecast.png")
     plt.close()
 
+    #residuals plot
+    residuals = y_test.values - forecast_means
+    plt.figure(figsize=(12, 6))
+    plt.plot(y_test.index.to_numpy(), residuals, label="Residuals", color="green", linewidth=2)
+    plt.axhline(0, color='black', linestyle='--', linewidth=1)
+    plt.title("Residuals of DLM MCMC Forecast")
+    plt.xlabel("Date")
+    plt.ylabel("Residuals")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("results/MCMC_residuals.png")
+    plt.close()
+
+    #trace plot
+    az.plot_trace(trace, var_names=["beta", "sigma"])
+    plt.savefig("results/MCMC_trace.png")     
+    plt.close()
+
+    """ #aic, bic, waic, loo
+    log_likelihood = np.asarray(trace.log_likelihood["y_obs"])
+    ll_samples = log_likelihood.sum(axis=0).flatten()
+    mean_ll = np.mean(ll_samples)
+    n_params = T_train + 1  # Number of parameters (beta + sigma)
+    n_obs = T_train
+    aic = -2 * mean_ll + 2 * n_params
+    bic = -2 * mean_ll + np.log(n_obs) * n_params
+    waic_result = az.waic(trace, pointwise=True)
+    loo_result = az.loo(trace, pointwise=True)
+    waic = waic_result.elpd_waic * -2  # Convert to deviance scale
+    loo = loo_result.elpd_loo * -2    # Convert to deviance scale
+    p_loo = loo_result.p_loo
+
+    # Save diagnostics
+    diagnostics = {
+        "AIC": aic,
+        "BIC": bic,
+        "WAIC": waic,
+        "LOO": loo,
+        "LOO_p_eff": p_loo
+    }
+
+    # Save Report as CSV
+    results_df = pd.DataFrame([{
+        "RMSE_Test": rmse_test,
+        "AIC": diagnostics["AIC"],
+        "BIC": diagnostics["BIC"],
+        "WAIC": diagnostics["WAIC"],
+        "LOO_CV": diagnostics["LOO"],
+        "LOO_p_eff": diagnostics["LOO_p_eff"]
+    }])
+    results_df.to_csv("results/model_performance_metrics.csv", index=False) """
     return trace, rmse_test
