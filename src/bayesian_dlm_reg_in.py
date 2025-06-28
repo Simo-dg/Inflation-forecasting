@@ -25,7 +25,7 @@ def dlm_model(X, y=None):
 
 
 def run_dlm_dynamic_regression_in(df, target_col, num_warmup=1500, num_samples=5000, num_chains=4):
-    """ keep_cols = [
+    keep_cols = [
         "Unemployment - %",
         "Economic_sentiment",
         "Exchangerate_CPI",
@@ -33,9 +33,6 @@ def run_dlm_dynamic_regression_in(df, target_col, num_warmup=1500, num_samples=5
     ]
 
     X = df[keep_cols].copy()
-    y = df[target_col].copy() """
-
-    X = df.drop(columns=[target_col]).copy()
     y = df[target_col].copy()
 
     X, y = X.align(y, join='inner', axis=0)
@@ -72,7 +69,7 @@ def run_dlm_dynamic_regression_in(df, target_col, num_warmup=1500, num_samples=5
     plt.title("Posterior Mean of Time-Varying Coefficients (NumPyro)")
     plt.legend()
     plt.tight_layout()
-    plt.savefig("results/dlm_dynamic_betas_numpyro.png")
+    plt.savefig("results/dlm_dynamic_betas_numpyro_in.png")
     plt.close()
 
     # Forecast vs Actual

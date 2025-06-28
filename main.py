@@ -234,8 +234,8 @@ print("\n" + "=" * 60)
 print("📊 Generating comparison plots and saving results...")
 
 # 📊 5. Comparison
-plot_model_comparison(rmse_results_out, filename="results/model_comparison_out_sample.png")
-plot_model_comparison(rmse_results_in, filename="results/model_comparison_in_sample.png")
+plot_model_comparison(rmse_results_out)
+plot_model_comparison(rmse_results_in)
 
 
 # 📝 Save RMSE to CSV

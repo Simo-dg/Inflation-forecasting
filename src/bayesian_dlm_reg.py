@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import jax
 import jax.numpy as jnp
 import numpyro
@@ -53,18 +54,36 @@ def forecast_one_step(beta_prev_samples, X_next, sigma_samples, beta_noise_scale
 
 def run_dlm_dynamic_regression(df, target_col, train_start, train_end, test_start, test_end,
                                num_warmup=1500, num_samples=5000, num_chains=4):
+    
+    keep_cols = [
+        "Unemployment - %",
+        "Economic_sentiment", 
+        "Exchangerate_CPI",
+        "10years_gov_bond_rate"
+    ]
+    
+    X_full = df[keep_cols].copy()
+    y_full = df[target_col].copy()
+    
+    X_full, y_full = X_full.align(y_full, join='inner', axis=0)
+    
+    mask = ~(X_full.isnull().any(axis=1) | y_full.isnull())
+    X_clean = X_full[mask]
+    y_clean = y_full[mask]
+    
     X_train, y_train, X_test, y_test = train_test_split_time_series(
-        df, train_start, train_end, test_start, test_end, target_col
+        pd.concat([X_clean, y_clean], axis=1), 
+        train_start, train_end, test_start, test_end, target_col
     )
-    X_train, y_train = X_train.align(y_train, join='inner', axis=0)
-    X_train = X_train.dropna()
-    y_train = y_train.loc[X_train.index]
-
+    X_train = X_train[keep_cols]
+    X_test = X_test[keep_cols]
+    
     scaler_X = StandardScaler()
     scaler_y = StandardScaler()
-
+    
     X_train_scaled = scaler_X.fit_transform(X_train)
     y_train_scaled = scaler_y.fit_transform(y_train.values.reshape(-1, 1)).flatten()
+    
 
     kernel = NUTS(dlm_model)
     mcmc = MCMC(kernel, num_warmup=num_warmup, num_samples=num_samples, num_chains=num_chains)
@@ -105,6 +124,10 @@ def run_dlm_dynamic_regression(df, target_col, train_start, train_end, test_star
     lower_bound = np.percentile(forecasts_original, 5, axis=1)
     upper_bound = np.percentile(forecasts_original, 95, axis=1)
 
+    # Compute RMSE on mean forecast
+    rmse_test = np.sqrt(np.mean((mean_forecast - y_test.values) ** 2))
+    print(f"NumPyro DLM One-Step Ahead RMSE (Test): {rmse_test:.4f}")
+
     # Plot forecast vs observed with credible intervals
     plt.figure(figsize=(12, 6))
     plt.plot(y_test.index.to_numpy(), y_test.values, label="Observed (Test)", color="blue", linewidth=2)
@@ -118,8 +141,6 @@ def run_dlm_dynamic_regression(df, target_col, train_start, train_end, test_star
     plt.savefig("results/dlm_regression_forecast.png")
     plt.close()
 
-    # Compute RMSE on mean forecast
-    rmse_test = np.sqrt(np.mean((mean_forecast - y_test.values) ** 2))
-    print(f"NumPyro DLM One-Step Ahead RMSE (Test): {rmse_test:.4f}")
+    
 
     return samples, rmse_test
