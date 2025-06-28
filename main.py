@@ -22,7 +22,7 @@ from src.arima_baseline_in import run_arima_in
 os.makedirs("results", exist_ok=True)
 
 # ⚙️ Dataset and variables
-data_path = "datasetcompleto.csv"
+data_path = "dataset.csv"
 target_col = "CPI - YoY"
 
 print("🚀 Starting Inflation Forecasting Model Comparison")
