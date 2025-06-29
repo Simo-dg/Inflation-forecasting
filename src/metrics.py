@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 def plot_model_comparison(rmse_dict):
-    # Ordina i modelli per RMSE crescente
+    # order models by RMSE
     sorted_items = sorted(rmse_dict.items(), key=lambda x: x[1])
     models = [k for k, _ in sorted_items]
     errors = [v for _, v in sorted_items]
@@ -9,7 +9,7 @@ def plot_model_comparison(rmse_dict):
     plt.figure(figsize=(10, 5))
     bars = plt.bar(models, errors, color='steelblue')
 
-    # Aggiungi etichette sopra le barre
+    # Add labels
     for bar, err in zip(bars, errors):
         yval = bar.get_height()
         plt.text(bar.get_x() + bar.get_width()/2, yval + 0.01, f"{err:.2f}",
