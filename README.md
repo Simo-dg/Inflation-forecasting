@@ -59,8 +59,10 @@ inflation-forecasting/
 │   ├── utils.py                
 │   └── metrics.py        
 ├── results/                     
-├── report.pdf                   
+├── report.pdf
+├── main.py              
 └── README.md
+
 ```
 
 ## 🚀 Getting Started
