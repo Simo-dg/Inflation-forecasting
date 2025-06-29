@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def plot_model_comparison(rmse_dict):
+def plot_model_comparison(rmse_dict, title="Model RMSE Comparison", filename="model_comparison.png"):
     # order models by RMSE
     sorted_items = sorted(rmse_dict.items(), key=lambda x: x[1])
     models = [k for k, _ in sorted_items]
@@ -16,9 +16,9 @@ def plot_model_comparison(rmse_dict):
                  ha='center', va='bottom', fontsize=9)
 
     plt.ylabel("RMSE")
-    plt.title("Model RMSE Comparison")
+    plt.title(title)
     plt.xticks(rotation=45)
     plt.grid(axis='y', linestyle='--', alpha=0.6)
     plt.tight_layout()
-    plt.savefig("results/model_comparison.png")
+    plt.savefig(f"results/{filename}")
     plt.close()
