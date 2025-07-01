@@ -4,10 +4,8 @@ A systematic comparison of nine forecasting models for inflation prediction duri
 
 ## 🎯 Key Results
 
-**Best Performing Model**: Bayesian DLM with MCMC
-- **RMSE**: 1.2151 (out-of-sample)
-- **10.9% improvement** over the second-best model (MLP)
-- **20.5% improvement** over traditional ARIMA benchmark
+**Best Performing Model**: MLP
+- **RMSE**: 1.3639 (out-of-sample)
 
 ### Model Performance Ranking (Out-of-Sample)
 1. **MLP - 1.3639** 🏆
