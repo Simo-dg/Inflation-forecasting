@@ -115,5 +115,6 @@ De Giorgi, S. (2025). Inflation Forecasting in Crisis Times: A Comprehensive
 Bayesian and Machine Learning Approach. Available at: 
 https://github.com/Simo-dg/Inflation-forecasting
 ```
+### Note: This is a non-peer-reviewed research project.
 
 *This project demonstrates that in times of crisis, adaptive and uncertainty-aware models significantly outperform traditional static approaches for inflation forecasting.*
