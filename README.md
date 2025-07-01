@@ -8,16 +8,15 @@ A systematic comparison of nine forecasting models for inflation prediction duri
 - **RMSE**: 1.3639 (out-of-sample)
 
 ### Model Performance Ranking (Out-of-Sample)
-1. **MLP - 1.3639** 🏆
-2. Multi-Layer Perceptron - 1.3639
-3. ARIMA - 1.4637
-4. Bayesian DLM (SMC) - 1.4724
-5. OLS + RFE - 1.6489
-6. OLS - 1.6639
-7. XGBoost - 1.7556
-8. Random Forest - 1.7665
-9. Bayesian DLM (MCMC) - 1.8404
-10. Bayesian DLM (DR) - 4.0686
+1. **Multi-Layer Perception - 1.3639** 🏆
+2. ARIMA - 1.4637
+3. Bayesian DLM (SMC) - 1.4724
+4. OLS + RFE - 1.6489
+5. OLS - 1.6639
+6. XGBoost - 1.7556
+7. Random Forest - 1.7665
+8. Bayesian DLM (MCMC) - 1.8404
+9. Bayesian DLM (DR) - 4.0686
 
 ## 🧠 Models Implemented
 
